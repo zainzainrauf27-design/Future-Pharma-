@@ -4,15 +4,14 @@ Responsive order, customer, product, recovery and ledger website. GitHub Pages h
 
 ## Existing project setup / update
 
-1. In GitHub, upload/replace the website files in this folder, keeping the `supabase` folder. GitHub Pages should point to the folder that contains `index.html`.
-2. In Supabase → **SQL Editor**, run `supabase/migration_staff_workflow.sql` once. This is for the existing database after the earlier `migration_eorder_book.sql`. Do not run the old Punjab geography migration; the new migration removes its generated location hierarchy and keeps business Areas/Sectors manually managed. Take a database backup first. The migration keeps existing manual Area/Sector rows but does not guess their new parent relationship; review and assign each Sector to its correct Area afterward. Existing Customers may need their Area/Sector assignment checked again.
-3. In GitHub, verify `config.js` has the project URL and **publishable** API key. Never place a secret/service-role key in GitHub.
-4. Wait for GitHub Pages to finish deploying, then reload the site (on phone, close the old tab and reopen it). Existing Supabase accounts continue to sign in as before.
-5. Sign in with an Admin account. Create an Area, then create one or more Sectors and assign each to its Area. Add Customers and Products before staff create orders.
+1. Before changing the database, make a Supabase backup. In the existing database, run `supabase/migration_price_versions.sql` in Supabase → **SQL Editor**. It is additive: it retains order-line prices, creates selectable historical prices from prior orders, and safely updates the Staff Draft-saving function to store the exact selected version. Do not rerun `migration_staff_workflow.sql` if you already ran it; that older migration is not safe to repeat because it removes legacy generated Punjab geography tables. If you have not run the Staff workflow migration yet, run that once first, then run the price migration.
+2. In GitHub, replace the website files with the files from this folder, including `index.html`, all `.js` and `.css` files, `service-worker.js`, and the `supabase` folder. Keep `config.js` configured with the project's URL and **publishable** API key. Never put a secret/service-role key in GitHub.
+3. Wait for the GitHub Pages deployment to finish. On your phone, close the old site tab and open the deployed address again. On PC, refresh the page. Sign in online once on each device/account so the browser can save the login profile and offline data.
+4. While online, open the Staff account at least once so customers, Areas, Sectors, products, price versions and order history are stored in that device's browser for offline work. Admin data is cached after Admin signs in. Add an Area, then its Sectors, and assign Customers before Staff starts orders.
 
 ## New database setup
 
-For a brand-new Supabase project, run `supabase/schema.sql`, then `supabase/migration_eorder_book.sql`, then `supabase/migration_staff_workflow.sql`. Create the initial confirmed Auth user and promote its profile to admin using the setup steps in `supabase/schema.sql` / your existing README setup. Deploy `supabase/functions/create-user` if Admin should create staff accounts.
+For a brand-new Supabase project, run `supabase/schema.sql`, then `supabase/migration_eorder_book.sql`, then `supabase/migration_staff_workflow.sql`, then `supabase/migration_price_versions.sql`. Create the initial confirmed Auth user and promote its profile to admin using the setup steps in `supabase/schema.sql` / your existing README setup. Deploy `supabase/functions/create-user` if Admin should create staff accounts.
 
 ## Locations
 
@@ -26,6 +25,14 @@ No Punjab, division, district, tehsil or union-council list is preloaded. An act
 ## Staff order process
 
 Staff can access only their own orders. Saving creates a **DRAFT**, which Staff can edit. **Confirm** changes it to **CONFIRMED** and locks it. **Send to Admin** changes it to **SUBMITTED**; only submitted/administrative orders enter the Admin order list. Database functions and row-level security enforce the ownership and state transitions as well as the interface.
+
+## Offline use and syncing
+
+- The first login for an account needs internet. After it has signed in, the browser keeps a local session/profile and a copy of that account's work data in IndexedDB.
+- Staff can create and edit a local `LOCAL-ORD-######` Draft without internet. It is marked **Pending Sync** and appears in Drafts. When connection returns, the site automatically saves it as a server Draft using its stable request key, which prevents creating a second server order on retry.
+- Syncing does **not** mark an order Confirmed or Submitted. Staff must be online to confirm it, then choose **Send to Admin** while online. A failed sync stays on the device as **Sync Failed** and can be retried.
+- Offline records are stored in that browser and device; they are not shared with another phone/PC until they sync to Supabase. Do not clear browser site data while orders show Pending Sync. Offline data is not a substitute for the Supabase database backup.
+- GitHub Pages can cache the app shell, and IndexedDB caches the datasets available at last online use. A brand-new browser/device must first connect and sign in. Availability of offline use depends on browser storage and previously cached data.
 
 ## Admin sections
 
@@ -43,4 +50,4 @@ Customer, product, order, recovery, Area, Sector and account profile records liv
 
 ## Important security note
 
-`config.js` may contain only the Supabase Project URL and publishable key. Keep the `service_role`/secret key exclusively in Supabase server-side secrets. Enable/retain the row-level security and policies from the SQL schema and migrations.
+`config.js` may contain only the Supabase Project URL and publishable key. Keep the `service_role`/secret key exclusively in Supabase server-side secrets. Enable/retain the row-level security and policies from the SQL schema and migrations. Apply the price-version migration before deploying the updated Staff ordering code; otherwise offline sync/price history may fail because the new table and order-item columns do not exist yet.
