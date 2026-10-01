@@ -1,4 +1,4 @@
-a(() => {
+(() => {
   const cfg = window.FUTURE_PHARMA_CONFIG || {};
   const key = cfg.supabasePublishableKey || cfg.supabaseAnonKey;
   if (!window.supabase || !cfg.supabaseUrl || !key) return;
