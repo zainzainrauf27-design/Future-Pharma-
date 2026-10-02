@@ -1,4 +1,4 @@
-const CACHE = 'future-pharma-shell-v5';
+const CACHE = 'future-pharma-shell-v6';
 const SHELL = ['./', './index.html', './styles.css', './overrides.css', './config.js', './offline-store.js', './app.js', './eorder-book.js', './staff-portal.js'];
 const CDN = [
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
