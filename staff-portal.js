@@ -4,7 +4,7 @@
   const db=window.supabase.createClient(cfg.supabaseUrl,key),view=()=>document.querySelector('#view');
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const money=n=>'Rs '+Number(n||0).toLocaleString('en-PK',{maximumFractionDigits:2});
-  const today=()=>new Date().toISOString().slice(0,10),offlineStore=window.FPOffline;let profile=null,staff=null,activePage='home',draftId=null,requestKey=null,lines=[],syncing=false;
+  const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Karachi',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()),offlineStore=window.FPOffline;let profile=null,staff=null,activePage='home',draftId=null,requestKey=null,lines=[],syncing=false;
   function toast(msg){const t=document.querySelector('#toast');if(t){t.textContent=msg;t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),3500)}}
   const uid=()=>staff?.id;
   async function cached(name){return offlineStore&&uid()?offlineStore.get(uid(),name):null;}
