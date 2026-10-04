@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://zainzainrauf27-design.github.io/Future-Pharma-/sitemap.xml
